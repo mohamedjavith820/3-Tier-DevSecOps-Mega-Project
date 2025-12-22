@@ -34,19 +34,21 @@ jobs:
           find . -name "*.js" -exec node --check {} +
           
   gitleaks_scan:
-       runs-on: Agent-1
-       needs: compile
-       steps: 
-         - name: checkout repo
-           uses: actions/checkout@v4
-           
-         - name: git leaks set up
-           uses: gitleaks/gitleaks/action@v2
-           
-         - name: gitleak scan
-           run: |
-             gitleaks detect --source ./client --exit-code 1
-             gitleaks detect --source ./api --exit-code 1
-           
-          
-      
+   runs-on: Agent-1
+   needs: compile
+
+   steps:
+     - name: Checkout repo
+       uses: actions/checkout@v4
+
+     - name: Install Gitleaks v8
+       run: |
+        curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.24.3/gitleaks_8.24.3_linux_x64.tar.gz | tar -xz
+        sudo mv gitleaks /usr/local/bin/gitleaks
+
+     - name: Run Gitleaks (client)
+       run: gitleaks detect --source ./client --exit-code 1
+
+     - name: Run Gitleaks (api)
+       run: gitleaks detect --source ./api --exit-code 1
+
