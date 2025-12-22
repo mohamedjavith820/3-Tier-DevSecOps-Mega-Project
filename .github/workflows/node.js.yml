@@ -22,7 +22,7 @@ jobs:
        with:
         node-version: '23'
 
-     - name: frontend syntax check
+     - name: frontend syntax checks
        run: |
          cd client
          find . -name "*.js" -exec node --check {} +
