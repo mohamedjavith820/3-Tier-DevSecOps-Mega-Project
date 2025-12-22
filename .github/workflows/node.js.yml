@@ -41,7 +41,7 @@ jobs:
            uses: actions/checkout@v4
            
          - name: git leaks set up
-           uses: gitleaks/gitleaks/action@v8
+           uses: gitleaks/gitleaks/action@v2
            
          - name: gitleak scan
            run: |
