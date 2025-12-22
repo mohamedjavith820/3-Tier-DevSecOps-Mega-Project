@@ -23,13 +23,13 @@ jobs:
         node-version: '18'
 
      - name: frontend syntax check
-         run:|
-            cd client
-            find . -name"*.js" -exec node --check {} +
+       run: |
+         cd client
+         find . -name"*.js" -exec node --check {} +
 
 
      - name: backend syntax check
-          run:|
-              cd api    
-               find . -name"*.js" -exec node --check {} + 
+       run: |
+          cd api    
+          find . -name"*.js" -exec node --check {} + 
       
