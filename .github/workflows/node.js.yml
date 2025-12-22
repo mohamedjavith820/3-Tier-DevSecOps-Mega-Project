@@ -69,24 +69,26 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
   sonar-frontends:
-       runs-on: Agent-1
-       needs: trivy-scan
-       
-       steps:
-         - name: checkout repo
-           uses: actions/checkout@v4
-         - name: sonar update  
-           uses: sonarsource/sonarqube-scan-action@master
-           with:
-              projectBaseDir: client
-              args: >
-               -Dsonar.ProjectKey=myorg_client
-               -Dsonar.ProjectName=myorg_client
-               -Dsonar.sources=.
-               -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**
-           env: 
-             SONAR_TOKEN: ${{secrets.SONAR_TOKEN }}
-             SONAR_HOST_URL: ${{secrets.SONAR_HOST_URL}}
+   runs-on: Agent-1
+   needs: trivy-scan
+
+   steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: SonarQube Scan (Frontend)
+      uses: sonarsource/sonarqube-scan-action@master
+      with:
+        projectBaseDir: client
+        args: >
+          -Dsonar.projectKey=myorg_client
+          -Dsonar.projectName=myorg_client
+          -Dsonar.sources=.
+          -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
   sonar-backend:
        runs-on: Agent-1
        needs: sonar-frontends
@@ -97,7 +99,7 @@ jobs:
          - name: sonar update  
            uses: sonarsource/sonarqube-scan-action@master
            with:
-              projectBaseDir: client
+              projectBaseDir: api
               args: >
                -Dsonar.ProjectKey=myorg_client
                -Dsonar.ProjectName=myorg_client
