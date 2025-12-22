@@ -101,8 +101,8 @@ jobs:
            with:
               projectBaseDir: api
               args: >
-               -Dsonar.ProjectKey=myorg_client
-               -Dsonar.ProjectName=myorg_client
+               -Dsonar.ProjectKey=myorg
+               -Dsonar.ProjectName=myorg
                -Dsonar.sources=.
                -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**
            env: 
