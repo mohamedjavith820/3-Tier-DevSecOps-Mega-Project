@@ -68,7 +68,7 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
-  sonar-frontend:
+  sonar-frontends:
        runs-on: Agent-1
        needs: trivy-scan
        
