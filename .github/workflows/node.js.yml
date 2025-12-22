@@ -25,11 +25,11 @@ jobs:
      - name: frontend syntax check
        run: |
          cd client
-         find . -name"*.js" -exec node --check {} +
+         find . -name "*.js" -exec node --check {} +
 
 
      - name: backend syntax check
        run: |
           cd api    
-          find . -name"*.js" -exec node --check {} + 
+          find . -name "*.js" -exec node --check {} + 
       
