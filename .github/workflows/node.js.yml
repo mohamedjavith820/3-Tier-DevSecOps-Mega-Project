@@ -10,7 +10,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  compile:
 
     runs-on: Agent-1
 
@@ -31,5 +31,20 @@ jobs:
      - name: backend syntax check
        run: |
           cd api    
-          find . -name "*.js" -exec node --check {} + 
+          find . -name "*.js" -exec node --check {} +
+          
+  gitleaks_scan:
+       runs-on: Agent-1
+       needs: compile
+       steps: 
+         - name: checkout repo
+           uses: actions/checkout@v4
+         - name: git leaks set up
+           uses: gitleaks/gitleaks/action@v2
+         - name: gitleak scan
+           run: |
+             gitleaks detect --source ./client --exit-code 1
+             gitleaks detect --source ./api --exit-code 1
+           
+          
       
