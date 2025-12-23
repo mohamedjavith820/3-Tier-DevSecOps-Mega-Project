@@ -135,7 +135,7 @@ jobs:
          context: ./client
          file: ./client/Dockerfile
          push: true
-         tags: javith/frontend:latest
+         tags: javithmj/frontend:latest
 
 
   build-backend-and-push-docker-image:
@@ -164,6 +164,6 @@ jobs:
           context: ./api
           file: ./api/Dockerfile
           push: true
-          tags: javith/backend:latest
+          tags: javithmj/backend:latest
 
                
