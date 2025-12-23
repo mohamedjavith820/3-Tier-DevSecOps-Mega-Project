@@ -109,7 +109,7 @@ jobs:
              SONAR_TOKEN: ${{secrets.SONAR_TOKEN }}
              SONAR_HOST_URL: ${{secrets.SONAR_HOST_URL}}     
              
-  build-frontend-and-push-docker-images:
+  build-frontend-and-push-docker-image:
     runs-on: Agent-1
     needs: sonar-backend
 
