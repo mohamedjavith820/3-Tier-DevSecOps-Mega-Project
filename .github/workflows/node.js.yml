@@ -110,60 +110,76 @@ jobs:
              SONAR_HOST_URL: ${{secrets.SONAR_HOST_URL}}     
              
   build-frontend-and-push-docker-image:
-    runs-on: Agent-1
-    needs: sonar-backend
+  
+   runs-on: Agent-1
+   needs: sonar-backend
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+   steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-         username: ${{vars.DOCKERHUB_USERNAME}}
-         password: ${{secrets.DOCKERHUB_TOKEN}}
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ vars.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+    # 1️⃣ Build image locally (NO push)
+    - name: Build frontend image (local)
+      uses: docker/build-push-action@v6
+      with:
+        context: ./client
+        file: ./client/Dockerfile
+        load: true
+        tags: javithmj/frontend:scan
 
-      - name: Build and push frontend image
-        uses: docker/build-push-action@v6
-        with:
-         context: ./client
-         file: ./client/Dockerfile
-         push: true
-         tags: javithmj/frontend:latest
+    # 2️⃣ Scan image with Trivy (BLOCKER)
+    - name: Trivy image scan (frontend)
+      uses: aquasecurity/trivy-action@0.24.0
+      with:
+        image-ref: javithmj/frontend:scan
+        vuln-type: os,library
+        severity: CRITICAL,HIGH
+        ignore-unfixed: true
+        exit-code: '1'
+
+    # 3️⃣ Push image ONLY if scan passes
+    - name: Push frontend image to Docker Hub
+      run: |
+        docker tag javithmj/frontend:scan javithmj/frontend:latest
+        docker push javithmj/frontend:latest
 
 
-  build-backend-and-push-docker-image:
-    runs-on: Agent-1
-    needs: build-frontend-and-push-docker-image
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  # build-backend-and-push-docker-image:
+  #   runs-on: Agent-1
+  #   needs: build-frontend-and-push-docker-image
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-         username: ${{ vars.DOCKERHUB_USERNAME }}
-         password: ${{ secrets.DOCKERHUB_TOKEN }}
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+  #     - name: Login to Docker Hub
+  #       uses: docker/login-action@v3
+  #       with:
+  #        username: ${{ vars.DOCKERHUB_USERNAME }}
+  #        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+  #     - name: Set up QEMU
+  #       uses: docker/setup-qemu-action@v3
 
-      - name: Build and push backend image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./api
-          file: ./api/Dockerfile
-          push: true
-          tags: javithmj/backend:latest
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v3
+
+  #     - name: Build and push backend image
+  #       uses: docker/build-push-action@v6
+  #       with:
+  #         context: ./api
+  #         file: ./api/Dockerfile
+  #         push: true
+  #         tags: javithmj/backend:latest
 
                
