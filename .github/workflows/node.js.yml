@@ -70,7 +70,7 @@ jobs:
           severity: 'CRITICAL,HIGH'
           
   sonar-frontends:
-       runs-on: self-hosted        # use Agent-1 only if label exists
+       runs-on: Agent-1       # use Agent-1 only if label exists
        needs: trivy-scan
 
        steps:
@@ -78,12 +78,6 @@ jobs:
          uses: actions/checkout@v4
 
    
-       - name: Debug Sonar URL
-         env:
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-         run: |
-          echo "SONAR_HOST_URL=$SONAR_HOST_URL"
-          curl -f $SONAR_HOST_URL/api/system/status
 
        - name: SonarQube Scan (Frontend)
          uses: SonarSource/sonarqube-scan-action@v2
