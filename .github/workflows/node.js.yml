@@ -76,6 +76,8 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v4
     - name: Debug Sonar URL
+      env:
+       SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       run: |
         echo "SONAR_HOST_URL=$SONAR_HOST_URL"
         curl $SONAR_HOST_URL/api/system/status
