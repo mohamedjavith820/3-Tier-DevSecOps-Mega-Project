@@ -68,22 +68,28 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
-  sonar-frontends:
-   runs-on: Agent-1
-   needs: trivy-scan
+          
+sonar-frontends:
+  runs-on: self-hosted        # use Agent-1 only if label exists
+  needs: trivy-scan
 
-   steps:
+  steps:
     - name: Checkout repo
       uses: actions/checkout@v4
+
+   
     - name: Debug Sonar URL
       env:
-       SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       run: |
-       echo "SONAR_HOST_URL=$SONAR_HOST_URL"
-       curl -f $SONAR_HOST_URL/api/system/status
+        echo "SONAR_HOST_URL=$SONAR_HOST_URL"
+        curl -f $SONAR_HOST_URL/api/system/status
 
     - name: SonarQube Scan (Frontend)
-      uses: sonarsource/sonarqube-scan-action@master
+      uses: SonarSource/sonarqube-scan-action@v2
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       with:
         projectBaseDir: client
         args: >
@@ -91,9 +97,7 @@ jobs:
           -Dsonar.projectName=myorg_client
           -Dsonar.sources=.
           -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
 
   sonar-backend:
        runs-on: Agent-1
@@ -102,6 +106,7 @@ jobs:
        steps:
          - name: checkout repo
            uses: actions/checkout@v4
+            
          - name: sonar update  
            uses: sonarsource/sonarqube-scan-action@master
            with:
