@@ -79,8 +79,8 @@ jobs:
       env:
        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       run: |
-        echo "SONAR_HOST_URL=$SONAR_HOST_URL"
-        curl $SONAR_HOST_URL/api/system/status
+       echo "SONAR_HOST_URL=$SONAR_HOST_URL"
+       curl -f $SONAR_HOST_URL/api/system/status
 
     - name: SonarQube Scan (Frontend)
       uses: sonarsource/sonarqube-scan-action@master
