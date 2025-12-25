@@ -75,6 +75,10 @@ jobs:
    steps:
     - name: Checkout repo
       uses: actions/checkout@v4
+    - name: Debug Sonar URL
+      run: |
+        echo "SONAR_HOST_URL=$SONAR_HOST_URL"
+        curl $SONAR_HOST_URL/api/system/status
 
     - name: SonarQube Scan (Frontend)
       uses: sonarsource/sonarqube-scan-action@master
