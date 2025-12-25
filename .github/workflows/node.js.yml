@@ -81,7 +81,9 @@ jobs:
 
        - name: SonarQube Scan (Frontend)
          uses: SonarSource/sonarqube-scan-action@master
-         
+         env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
          with:
           projectBaseDir: client
           args: >
@@ -89,10 +91,7 @@ jobs:
            -Dsonar.projectName=myorg_client
            -Dsonar.sources=.
            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**
-           env:
-            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-            SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-
+          
 
   sonar-backend:
        runs-on: Agent-1
