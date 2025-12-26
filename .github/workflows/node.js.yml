@@ -79,11 +79,13 @@ jobs:
 
    
 
-       - name: SonarQube Scan (Frontend)
-         uses: SonarSource/sonarqube-scan-action@master
+      
          env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+       - name: SonarQube Scan (Frontend)
+         uses: SonarSource/sonarqube-scan-action@master
+         
          with:
           projectBaseDir: client
           args: >
