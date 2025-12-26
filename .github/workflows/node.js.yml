@@ -75,11 +75,7 @@ jobs:
 
        steps:
        - name: Checkout repo
-         uses: actions/checkout@v4
-
-   
-
-      
+         uses: actions/checkout@v4      
          env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
