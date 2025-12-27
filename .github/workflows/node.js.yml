@@ -93,25 +93,26 @@ jobs:
           
 
   sonar-backend:
-       runs-on: Agent-1
-       needs: sonar-frontends
-       
-       steps:
-         - name: checkout repo
-           uses: actions/checkout@v4
-            
-         - name: sonar update  
-           uses: sonarsource/sonarqube-scan-action@master
-           with:
-              projectBaseDir: api
-              args: >
-               -Dsonar.projectKey=myorg_api
-               -Dsonar.projectName=myorg_api
-               -Dsonar.sources=.
-               -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**
-           env: 
-             SONAR_TOKEN: ${{secrets.SONAR_TOKEN }}
-             SONAR_HOST_URL: ${{vars.SONAR_HOST_URL}}     
+   runs-on: Agent-1
+   needs: sonar-frontends
+
+   steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: SonarQube Scan (Backend)
+      uses: sonarsource/sonarqube-scan-action@master
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+      with:
+        projectBaseDir: api
+        args: >
+          -Dsonar.projectKey=myorg_api
+          -Dsonar.projectName=myorg_api
+          -Dsonar.sources=.
+          -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**
+     
              
   build-frontend-and-push-nexus:
     runs-on: Agent-1
