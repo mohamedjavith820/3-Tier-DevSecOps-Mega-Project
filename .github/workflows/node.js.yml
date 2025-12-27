@@ -117,34 +117,38 @@ jobs:
    needs: sonar-backend
 
    steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-    - name: Login to Nexus Docker registry
+    # 🔐 Login to Nexus Docker Registry
+    - name: Login to Nexus
       run: |
         echo "${{ secrets.NEXUS_PASSWORD }}" | docker login \
           ${{ secrets.NEXUS_REGISTRY }} \
           -u "${{ secrets.NEXUS_USERNAME }}" \
           --password-stdin
 
+    # 🏗 Build frontend image
     - name: Build frontend image
       run: |
         docker build -t frontend:scan ./client
 
+    # 🔍 Trivy scan (FAILS pipeline on HIGH/CRITICAL)
     - name: Trivy scan frontend image
       uses: aquasecurity/trivy-action@0.24.0
       with:
         image-ref: frontend:scan
         severity: HIGH,CRITICAL
+        vuln-type: os,library
         ignore-unfixed: true
         exit-code: '1'
 
-    - name: Tag frontend image for Nexus
+    # 🚀 Tag & Push to Nexus
+    - name: Tag & Push frontend image
       run: |
         docker tag frontend:scan \
           ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/frontend:latest
 
-    - name: Push frontend image to Nexus
-      run: |
         docker push \
           ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/frontend:latest
 
@@ -153,30 +157,41 @@ jobs:
   build-backend-and-push-nexus:
     runs-on: Agent-1
     needs: build-frontend-and-push-nexus
-
+ 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
+    # 🔐 Login to Nexus Docker registry
     - name: Login to Nexus
       run: |
-        echo "${{ secrets.NEXUS_PASSWORD }}" | docker login ${{ secrets.NEXUS_REGISTRY }} \
-          -u "${{ secrets.NEXUS_USERNAME }}" --password-stdin
+        echo "${{ secrets.NEXUS_PASSWORD }}" | docker login \
+          ${{ secrets.NEXUS_REGISTRY }} \
+          -u "${{ secrets.NEXUS_USERNAME }}" \
+          --password-stdin
 
-    - name: Build backend image (local)
+    # 🏗 Build backend image
+    - name: Build backend image
       run: |
         docker build -t backend:scan ./api
 
+    # 🔍 Trivy scan (security gate)
     - name: Trivy scan backend image
       uses: aquasecurity/trivy-action@0.24.0
       with:
         image-ref: backend:scan
-        severity: CRITICAL,HIGH
+        severity: HIGH,CRITICAL
+        vuln-type: os,library
         ignore-unfixed: true
         exit-code: '1'
 
-    - name: Push backend image to Nexus
+    # 🚀 Tag & Push backend image to Nexus
+    - name: Tag & Push backend image
       run: |
-        docker tag backend:scan ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/backend:latest
-        docker push ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/backend:latest
+        docker tag backend:scan \
+          ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/backend:latest
+
+        docker push \
+          ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/backend:latest
 
 
