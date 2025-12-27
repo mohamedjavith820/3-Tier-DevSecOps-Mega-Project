@@ -70,26 +70,25 @@ jobs:
           severity: 'CRITICAL,HIGH'
           
   sonar-frontends:
-       runs-on: Agent-1       # use Agent-1 only if label exists
-       needs: trivy-scan
+   runs-on: Agent-1
+   needs: trivy-scan
 
-       steps:
-       - name: Checkout repo
-         uses: actions/checkout@v4      
-        
-       - name: SonarQube Scan (Frontend)
-         uses: SonarSource/sonarqube-scan-action@v2
-         
-         with:
-          projectBaseDir: client
-          args: >
-           -Dsonar.projectKey=myorg_client
-           -Dsonar.projectName=myorg_client
-           -Dsonar.sources=.
-           -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**
-         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+   steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: SonarQube Scan (Frontend)
+      uses: SonarSource/sonarqube-scan-action@v2
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      with:
+        projectBaseDir: client
+        args: >
+          -Dsonar.projectKey=myorg_frontend
+          -Dsonar.projectName=myorg_frontend
+          -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/**
+
           
 
   sonar-backend:
