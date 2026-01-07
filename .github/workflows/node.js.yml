@@ -8,6 +8,9 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+env:
+  IMAGE_TAG: ${{ github.run_number }}
+
 
 jobs:
   compile:
@@ -117,81 +120,73 @@ jobs:
    needs: sonar-backend
 
    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+   - name: Checkout code
+     uses: actions/checkout@v4
 
-    # 🔐 Login to Nexus Docker Registry
-    - name: Login to Nexus
-      run: |
-        echo "${{ secrets.NEXUS_PASSWORD }}" | docker login \
-          ${{ secrets.NEXUS_REGISTRY }} \
-          -u "${{ secrets.NEXUS_USERNAME }}" \
-          --password-stdin
+   - name: Login to Nexus
+     run: |
+      echo "${{ secrets.NEXUS_PASSWORD }}" | docker login \
+        ${{ secrets.NEXUS_REGISTRY }} \
+        -u "${{ secrets.NEXUS_USERNAME }}" \
+        --password-stdin
 
-    # 🏗 Build frontend image
-    - name: Build frontend image
-      run: |
-        docker build -t frontend:scan ./client
+   - name: Build frontend image
+     run: |
+      docker build -t frontend:${IMAGE_TAG} ./client
 
-    # 🔍 Trivy scan (FAILS pipeline on HIGH/CRITICAL)
-    - name: Trivy scan frontend image
-      uses: aquasecurity/trivy-action@0.24.0
-      with:
-        image-ref: frontend:scan
-        severity: HIGH,CRITICAL
-        vuln-type: os,library
-        ignore-unfixed: true
-        exit-code: '1'
+   - name: Trivy scan frontend image
+     uses: aquasecurity/trivy-action@0.24.0
+     with:
+      image-ref: frontend:${IMAGE_TAG}
+      severity: HIGH,CRITICAL
+      vuln-type: os,library
+      ignore-unfixed: true
+      exit-code: '1'
 
-    # 🚀 Tag & Push to Nexus
-    - name: Tag & Push frontend image
-      run: |
-        docker tag frontend:scan \
-          ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/frontend:latest
+   - name: Tag & Push frontend image
+     run: |
+      docker tag frontend:${IMAGE_TAG} \
+        ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/frontend:${IMAGE_TAG}
 
-        docker push \
-          ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/frontend:latest
-
+      docker push \
+        ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/frontend:${IMAGE_TAG}
 
         
   build-backend-and-push-nexus:
-    runs-on: Agent-1
-    needs: build-frontend-and-push-nexus
- 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+   runs-on: Agent-1
+   needs: build-frontend-and-push-nexus
 
-    # 🔐 Login to Nexus Docker registry
-    - name: Login to Nexus
-      run: |
-        echo "${{ secrets.NEXUS_PASSWORD }}" | docker login \
-          ${{ secrets.NEXUS_REGISTRY }} \
-          -u "${{ secrets.NEXUS_USERNAME }}" \
-          --password-stdin
+   steps:
+   - name: Checkout code
+     uses: actions/checkout@v4
 
-    # 🏗 Build backend image
-    - name: Build backend image
-      run: |
-        docker build -t backend:scan ./api
+   - name: Login to Nexus
+     run: |
+      echo "${{ secrets.NEXUS_PASSWORD }}" | docker login \
+        ${{ secrets.NEXUS_REGISTRY }} \
+        -u "${{ secrets.NEXUS_USERNAME }}" \
+        --password-stdin
 
-    # 🔍 Trivy scan (security gate)
-    - name: Trivy scan backend image
-      uses: aquasecurity/trivy-action@0.24.0
-      with:
-        image-ref: backend:scan
-        severity: HIGH,CRITICAL
-        vuln-type: os,library
-        ignore-unfixed: true
-        exit-code: '1'
+   - name: Build backend image
+     run: |
+      docker build -t backend:${IMAGE_TAG} ./api
 
-    # 🚀 Tag & Push backend image to Nexus
-    - name: Tag & Push backend image
-      run: |
-        docker tag backend:scan \
-          ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/backend:latest
+   - name: Trivy scan backend image
+     uses: aquasecurity/trivy-action@0.24.0
+     with:
+      image-ref: backend:${IMAGE_TAG}
+      severity: HIGH,CRITICAL
+      vuln-type: os,library
+      ignore-unfixed: true
+      exit-code: '1'
 
-        docker push \
-          ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/backend:latest
+   - name: Tag & Push backend image
+     run: |
+      docker tag backend:${IMAGE_TAG} \
+        ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/backend:${IMAGE_TAG}
+
+      docker push \
+        ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/backend:${IMAGE_TAG}
+
 
 
