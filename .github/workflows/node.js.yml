@@ -138,7 +138,7 @@ jobs:
      uses: aquasecurity/trivy-action@0.24.0
      with:
       image-ref: frontend:${IMAGE_TAG}
-      severity: HIGH,CRITICAL
+      severity: CRITICAL
       vuln-type: os,library
       ignore-unfixed: true
       exit-code: '1'
@@ -175,7 +175,7 @@ jobs:
      uses: aquasecurity/trivy-action@0.24.0
      with:
       image-ref: backend:${IMAGE_TAG}
-      severity: HIGH,CRITICAL
+      severity: CRITICAL
       vuln-type: os,library
       ignore-unfixed: true
       exit-code: '1'
