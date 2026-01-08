@@ -106,9 +106,10 @@ jobs:
     # Push Images to ECR
     # ==============================
     - name: Push images to ECR
+      shell: bash
       run: |
-        docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$FRONTEND_REPO:${IMAGE_TAG}
-        docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$BACKEND_REPO:${IMAGE_TAG}
+       docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FRONTEND_REPO}:${IMAGE_TAG}"
+       docker push "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BACKEND_REPO}:${IMAGE_TAG}"
 
     # # ==============================
     # # Terraform Init
