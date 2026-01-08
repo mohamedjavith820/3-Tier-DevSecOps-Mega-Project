@@ -99,8 +99,8 @@ jobs:
        "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${FRONTEND_REPO}:${IMAGE_TAG}"
 
        docker tag \
-      "${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/${BACKEND_REPO}:${IMAGE_TAG}" \
-      "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BACKEND_REPO}:${IMAGE_TAG}"
+       "${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/${BACKEND_REPO}:${IMAGE_TAG}" \
+       "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${BACKEND_REPO}:${IMAGE_TAG}"
 
     # ==============================
     # Push Images to ECR
