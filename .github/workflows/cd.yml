@@ -29,6 +29,11 @@ jobs:
     - name: Set image tag from CI
       run: |
         echo "IMAGE_TAG=${{ github.event.workflow_run.run_number }}" >> $GITHUB_ENV
+   # ==============================
+   # Setup AWS CLI
+   # ==============================
+    - name: Setup AWS CLI
+      uses: aws-actions/setup-aws-cli@v4    
 
     # ==============================
     # Configure AWS Credentials
