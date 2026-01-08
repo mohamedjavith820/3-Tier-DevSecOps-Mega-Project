@@ -90,14 +90,13 @@ jobs:
     # Tag Images for ECR
     # ==============================
     - name: Tag images for ECR
+      shell: bash
       run: |
-        docker tag \
-          ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/$FRONTEND_REPO:${IMAGE_TAG} \
-          ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$FRONTEND_REPO:${IMAGE_TAG}
+       docker tag "${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/${FRONTEND_REPO}:${IMAGE_TAG}" \
+               "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${FRONTEND_REPO}:${IMAGE_TAG}"
 
-        docker tag \
-          ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/$BACKEND_REPO:${IMAGE_TAG} \
-          ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$BACKEND_REPO:${IMAGE_TAG}
+       docker tag "${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/${BACKEND_REPO}:${IMAGE_TAG}" \
+               "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${BACKEND_REPO}:${IMAGE_TAG}"
 
     # ==============================
     # Push Images to ECR
