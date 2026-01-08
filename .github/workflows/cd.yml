@@ -100,19 +100,19 @@ jobs:
         docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$FRONTEND_REPO:${IMAGE_TAG}
         docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$BACKEND_REPO:${IMAGE_TAG}
 
-    # ==============================
-    # Terraform Init
-    # ==============================
-    - name: Terraform Init
-      working-directory: terraform
-      run: terraform init
+    # # ==============================
+    # # Terraform Init
+    # # ==============================
+    # - name: Terraform Init
+    #   working-directory: terraform
+    #   run: terraform init
 
-    # ==============================
-    # Terraform Apply (DEPLOY)
-    # ==============================
-    - name: Terraform Apply
-      working-directory: terraform
-      run: |
-        terraform apply -auto-approve \
-          -var="frontend_image_tag=${IMAGE_TAG}" \
-          -var="backend_image_tag=${IMAGE_TAG}"
+    # # ==============================
+    # # Terraform Apply (DEPLOY)
+    # # ==============================
+    # - name: Terraform Apply
+    #   working-directory: terraform
+    #   run: |
+    #     terraform apply -auto-approve \
+    #       -var="frontend_image_tag=${IMAGE_TAG}" \
+    #       -var="backend_image_tag=${IMAGE_TAG}"
