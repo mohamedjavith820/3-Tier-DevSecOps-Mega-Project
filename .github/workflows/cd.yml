@@ -1,0 +1,118 @@
+name: CD - Promote to AWS & Deploy ECS
+
+on:
+  workflow_run:
+    workflows: ["Node.js CI"]   
+    types:
+      - completed
+
+env:
+  FRONTEND_REPO: frontend
+  BACKEND_REPO: backend
+
+jobs:
+  deploy:
+    # Run CD ONLY if CI succeeded
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: Agent-1
+
+    steps:
+    # ==============================
+    # Checkout Terraform Code
+    # ==============================
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # ==============================
+    # Capture IMAGE TAG from CI
+    # ==============================
+    - name: Set image tag from CI
+      run: |
+        echo "IMAGE_TAG=${{ github.event.workflow_run.run_number }}" >> $GITHUB_ENV
+
+    # ==============================
+    # Configure AWS Credentials
+    # ==============================
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    # ==============================
+    # Login to Amazon ECR
+    # ==============================
+    - name: Login to Amazon ECR
+      run: |
+        aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
+        | docker login --username AWS \
+          --password-stdin \
+          ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
+    # ==============================
+    # Login to Nexus
+    # ==============================
+    - name: Login to Nexus
+      run: |
+        echo "${{ secrets.NEXUS_PASSWORD }}" | docker login \
+          ${{ secrets.NEXUS_REGISTRY }} \
+          -u "${{ secrets.NEXUS_USERNAME }}" \
+          --password-stdin
+
+    # ==============================
+    # Pull Images from Nexus
+    # ==============================
+    - name: Pull images from Nexus
+      run: |
+        docker pull ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/$FRONTEND_REPO:${IMAGE_TAG}
+        docker pull ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/$BACKEND_REPO:${IMAGE_TAG}
+
+    # ==============================
+    # Create ECR Repositories (safe)
+    # ==============================
+    - name: Ensure ECR repositories exist
+      run: |
+        aws ecr describe-repositories --repository-names $FRONTEND_REPO \
+        || aws ecr create-repository --repository-name $FRONTEND_REPO
+
+        aws ecr describe-repositories --repository-names $BACKEND_REPO \
+        || aws ecr create-repository --repository-name $BACKEND_REPO
+
+    # ==============================
+    # Tag Images for ECR
+    # ==============================
+    - name: Tag images for ECR
+      run: |
+        docker tag \
+          ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/$FRONTEND_REPO:${IMAGE_TAG} \
+          ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$FRONTEND_REPO:${IMAGE_TAG}
+
+        docker tag \
+          ${{ secrets.NEXUS_REGISTRY }}/${{ secrets.NEXUS_REPO }}/$BACKEND_REPO:${IMAGE_TAG} \
+          ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$BACKEND_REPO:${IMAGE_TAG}
+
+    # ==============================
+    # Push Images to ECR
+    # ==============================
+    - name: Push images to ECR
+      run: |
+        docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$FRONTEND_REPO:${IMAGE_TAG}
+        docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/$BACKEND_REPO:${IMAGE_TAG}
+
+    # ==============================
+    # Terraform Init
+    # ==============================
+    - name: Terraform Init
+      working-directory: terraform
+      run: terraform init
+
+    # ==============================
+    # Terraform Apply (DEPLOY)
+    # ==============================
+    - name: Terraform Apply
+      working-directory: terraform
+      run: |
+        terraform apply -auto-approve \
+          -var="frontend_image_tag=${IMAGE_TAG}" \
+          -var="backend_image_tag=${IMAGE_TAG}"
