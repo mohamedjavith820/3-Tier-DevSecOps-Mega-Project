@@ -148,7 +148,7 @@ jobs:
    - name: Trivy scan frontend image
      uses: aquasecurity/trivy-action@0.24.0
      with:
-      image-ref: frontend:${IMAGE_TAG }
+      image-ref: frontend:${{ env.IMAGE_TAG }}
       severity: CRITICAL
       vuln-type: os,library
       ignore-unfixed: true
@@ -195,7 +195,7 @@ jobs:
    - name: Trivy scan backend image
      uses: aquasecurity/trivy-action@0.24.0
      with:
-      image-ref: backend:${IMAGE_TAG }
+      image-ref: backend:${{ env.IMAGE_TAG }}
       severity: CRITICAL
       vuln-type: os,library
       ignore-unfixed: true
