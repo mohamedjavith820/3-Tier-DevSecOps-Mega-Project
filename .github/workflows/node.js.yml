@@ -122,6 +122,17 @@ jobs:
    steps:
    - name: Checkout code
      uses: actions/checkout@v4
+     
+   - name: Debug IMAGE_TAG
+     run: echo "IMAGE_TAG=$IMAGE_TAG"
+
+   - name: Validate IMAGE_TAG
+     run: |
+      if [ -z "$IMAGE_TAG" ]; then
+        echo "❌ IMAGE_TAG is empty"
+        exit 1
+      fi
+
 
    - name: Login to Nexus
      run: |
@@ -137,7 +148,7 @@ jobs:
    - name: Trivy scan frontend image
      uses: aquasecurity/trivy-action@0.24.0
      with:
-      image-ref: frontend:${{ env.IMAGE_TAG }}
+      image-ref: frontend:${IMAGE_TAG }
       severity: CRITICAL
       vuln-type: os,library
       ignore-unfixed: true
@@ -159,7 +170,17 @@ jobs:
    steps:
    - name: Checkout code
      uses: actions/checkout@v4
+     
+   - name: Debug IMAGE_TAG
+     run: echo "IMAGE_TAG=$IMAGE_TAG"
 
+   - name: Validate IMAGE_TAG
+     run: |
+      if [ -z "$IMAGE_TAG" ]; then
+        echo "❌ IMAGE_TAG is empty"
+        exit 1
+      fi
+      
    - name: Login to Nexus
      run: |
       echo "${{ secrets.NEXUS_PASSWORD }}" | docker login \
@@ -174,7 +195,7 @@ jobs:
    - name: Trivy scan backend image
      uses: aquasecurity/trivy-action@0.24.0
      with:
-      image-ref: backend:${{ env.IMAGE_TAG }}
+      image-ref: backend:${IMAGE_TAG }
       severity: CRITICAL
       vuln-type: os,library
       ignore-unfixed: true
